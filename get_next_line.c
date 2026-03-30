@@ -19,7 +19,7 @@ char	*append_to_line(char *line, char *buf, int len)
 
 	substr = malloc(len + 1);
 	if (!substr)
-		return (NULL);
+		return (free(line), NULL);
 	ft_strncpy(substr, buf, len);
 	substr[len] = '\0';
 	if (!line)
@@ -117,7 +117,11 @@ char	*get_next_line(int fd)
 		return (NULL);
 	buf = malloc(BUFFER_SIZE + 1);
 	if (!buf)
+	{
+		free(remainders[fd]);
+		remainders[fd] = NULL;
 		return (NULL);
+	}
 	line = read_until(fd, &remainders[fd], buf);
 	if (line == NULL)
 	{

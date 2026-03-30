@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.h                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mabusham <mabusham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -27,7 +27,7 @@
 # endif
 
 char	*get_next_line(int fd);
-char	*read_until(int fd, char **remainder);
+char	*read_until(int fd, char **remainder, char *buf);
 char	*ft_strncpy(char *dest, char *src, size_t n);
 char	*ft_strjoin(char *s1, char *s2);
 int		ft_strfind(char *str, char c);
