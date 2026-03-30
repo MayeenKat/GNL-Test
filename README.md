@@ -79,7 +79,7 @@ NULL - End of file or error.
 ### append_to_line
 **Prototype**
 ```c
-char *append_to_line(char *line, char *buf, int len);
+char	*append_to_line(char *line, char *buf, int len);
 ```
 **Role**\
 *Append len characters from buf to line.*
@@ -87,9 +87,9 @@ char *append_to_line(char *line, char *buf, int len);
 *How it works?*
 1. Allocate substr of size len
 2. Copy part of buf into it
-3. If (line == NULL), return substr directly
+3. If ```line``` is empty, return substr
 4. Else:
-	Join (line + substr) and free old line and substr
+	Join ```line + substr``` and free old line and substr
 
 Example:
 ```c
@@ -107,12 +107,12 @@ Old memory is freed to prevent leaks.
 int process_stopper(char **line, char *buf, char **remainder, int bytes);
 ```
 **Role**\
-*Check if \n exists in the buffer and handle it.*
+*Check if \n exists in the buffer and handles it.*
 
 If newline is found:
 1. Add up to \n to line ```*line = append_to_line(*line, buf, index + 1);```
 2. Store leftover in remainder ```*remainder = ft_strdup(buf + index + 1);```
-3. Return ```return 1;```
+3. Returns 1 to stop reading, 0 to continue and -1 for error.
 
 Example:
 
@@ -130,7 +130,7 @@ Stops reading.
 **Prototype**
 
 ``` c
-char *handle_existing_remainder(char **remainder);
+char	*handle_existing_remainder(char **remainder);
 ```
 
 **Role**\
@@ -139,11 +139,9 @@ Use leftover data before reading from file\
 If remainder contains a newline:
 ```c
 remainder = "Hello\nWorld"
-
 line = "Hello\n"
 remainder = "World"
 ```
-Returns immediately.
 
 If no newline exists:
 ```c
@@ -167,7 +165,7 @@ remainder = "world"
 
 **Prototype**
 ```c
-char *read_until(int fd, char **remainder);
+char	*read_until(int fd, char **remainder, char *buf);
 ```
 **Role**\
 Read chunks until you complete one line using:
@@ -175,20 +173,38 @@ Read chunks until you complete one line using:
 read(fd, buf, BUFFER_SIZE)
 ```
 *How it works?*
-1. Start with remainder ```line = handle_existing_remainder(remainder);```
-2. Read from file loop ```bytes = read(fd, buf, BUFFER_SIZE);```
-
-**End of file or Error:**
+1. Start with remainder ```line = handle_existing_remainder(remainder);```\
+- If previous call had leftover text, use it first
 ```c
- if (bytes <= 0)
+if (line && ft_strfind(line, '\n') >= 0)
+	return (line);
+```
+- If that leftover already contains a newline, return immediately
+
+2. Read loop
+```c
+while (1)
+{
+    bytes = read(fd, buf, BUFFER_SIZE);
+```
+
+**Error:**
+```c
+if (bytes < 0)
+    return (free(line), NULL);
+```
+
+**End of file:**
+```c
+if (bytes == 0)
     break;
 ```
 **Process buffer**
 ```c
-res = process_stopper(...)
+res = process_stopper(&line, buf, remainder, bytes);
 ```
 
-if (res == 1), newline found -> Stops
+if (res == 1), newline found -> Stops while loop
 if (res == -1), error -> return NULL
 
 **No newline, append whole buffer**
@@ -221,11 +237,12 @@ static char *remainders[4096];
 ```
 This allows handling multiple files simultaneously.
 
-Calls main logic 
-```c
-line = read_until(fd, &remainders[fd]);
-```
-Returns line
+1. Allocate buffer
+2. Call read_until ```line = read_until(fd, &remainders[fd]);```
+3. If failure → clean remainder
+4. Free buffer
+5. Return the line
+
 ```
 Hello\nWorld\n
 ```
@@ -265,19 +282,10 @@ char *ft_strjoin(char *s1, char *s2);
 char *ft_strncpy(char *dest, char *src, size_t n);
 
 //Finds first occurence of character, Returns index or -1.
-int ft_strfind(char *str, char c);
+int	ft_strfind(char *str, char c);
 
 //Duplicates string
-char	*ft_strdup(char *s1)
-
-//Safely joins buffer to line and frees old memory.
-char *append_to_line(char *line, char *buf);
-
-//Splits buffer at newline and stores remainder.
-int process_stopper(char **line, char *buf, char **remainder, int bytes);
-
-//Extracts line from previous remainder if available.
-char *handle_existing_remainder(char **remainder, char stopper); 
+char *ft_strdup(char *s1)
 
 ```
 ------------------------------------------------------------------------
